@@ -1,0 +1,6 @@
+Revision history for Perl extension WWW::Scraper::Yahoo360.
+
+0.01  Wed Apr 22 13:23:00 2009
+	- original version; created by h2xs 1.23 with options
+		--use-new-tests -n WWW::Scraper::Yahoo360 -X -A
+
