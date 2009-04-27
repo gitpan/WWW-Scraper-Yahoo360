@@ -1,7 +1,7 @@
 --- #YAML:1.0
 name:               WWW-Scraper-Yahoo360
-version:            0.01
-abstract:           Perl extension for blah blah blah
+version:            0.02
+abstract:           Yahoo 360 blogs old-fashioned crappy scraper
 author:
     - Cosimo Streppone <cosimo@cpan.org>
 license:            unknown
