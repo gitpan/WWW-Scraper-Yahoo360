@@ -1,5 +1,9 @@
 Revision history for Perl extension WWW::Scraper::Yahoo360.
 
+0.05  Tue May 26 08:53:17 2009
+    - login() method didn't report failures correctly. Not it's fixed.
+    - added a -verbose option to the export blog script.
+
 0.04  Mon May 11 23:55:33 2009
 	- some blog posts could be parsed incorrectly, leading to
 	  truncated content. This is now fixed and test-covered.

@@ -1,7 +1,7 @@
 #
 # Ignorant Yahoo 360 blog scraper (blog.360.yahoo.com)
 #
-# $Id: Yahoo360.pm 166 2009-05-12 22:10:14Z cosimo $
+# $Id$
 
 package WWW::Scraper::Yahoo360;
 
@@ -19,7 +19,7 @@ use constant BLOG_URL   => q{http://blog.360.yahoo.com/blog/};
 use constant LOGIN_FORM => q{login_form};
 use constant LOGIN_URL  => q{https://login.yahoo.com/config/login_verify2?.intl=us&.done=http%3A%2F%2Fblog.360.yahoo.com%2Fblog%2F%3F.login%3D1&.src=360};
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 sub new {
     my ($class, $args) = @_;
@@ -129,6 +129,12 @@ sub login {
         }, 
         button    => '.save',
     );
+
+    # Not sure how to make this more robust
+    my $next_page = $mech->content();
+    if ($next_page =~ m{Invalid ID or password}) {
+        return;
+    }
 
     return $mech->success();
 }

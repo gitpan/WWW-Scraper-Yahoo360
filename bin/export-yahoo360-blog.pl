@@ -14,13 +14,22 @@ use Getopt::Long;
 use JSON::XS;
 use WWW::Scraper::Yahoo360;
 
+our $verbose;
+
+sub debug {
+    if ($verbose) {
+        print STDERR @_, "\n";
+    }
+}
+
 GetOptions(
     'username:s' => \my $username,
     'password:s' => \my $password,
+    'verbose'    => \$verbose,
 );
 
 if (! $username || ! $password) {
-    die "$0 --username=... --password=...\n";
+    die "$0 --username=<yahoo_id> --password=<yahoo_password> [--verbose]\n";
 }
 
 my $y360 = WWW::Scraper::Yahoo360->new({
@@ -28,12 +37,20 @@ my $y360 = WWW::Scraper::Yahoo360->new({
     password => $password,
 });
 
+debug("Yahoo scraper initialized. Trying to login as '$username'.");
+
 $y360->login() or die "Can't login to Yahoo!";
+
+debug("Logged in successfully. Getting blog information.");
 
 my $blog_info = $y360->blog_info();
 
+debug("Got blog information. Reading blog posts...");
+
 my $posts = $y360->get_blog_posts();
 $blog_info->{items} = $posts;
+
+debug("Reading all blog comments...");
 
 my $comments = $y360->get_blog_comments($posts);
 $blog_info->{comments} = $comments;
