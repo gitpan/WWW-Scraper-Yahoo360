@@ -19,7 +19,7 @@ use constant BLOG_URL   => q{http://blog.360.yahoo.com/blog/};
 use constant LOGIN_FORM => q{login_form};
 use constant LOGIN_URL  => q{https://login.yahoo.com/config/login_verify2?.intl=us&.done=http%3A%2F%2Fblog.360.yahoo.com%2Fblog%2F%3F.login%3D1&.src=360};
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 sub new {
     my ($class, $args) = @_;
@@ -268,14 +268,28 @@ sub get_blog_posts {
            
             # Blog post title 
             my $title = $1;
-            my $post = { title => $1 };
+            my $post = {
+                title => $1,
+                description => ''
+            };
 
             #print "    [$n] Title: $title\n";
+
+            # Main picture of the blog post
+            if ($blog_page =~ m{<div class="image-wrapper">(.*?)</div>$}gms) {
+                my $pic = $1;
+                $pic =~ s{^\s*}{}mx;
+                $pic =~ s{\s*$}{}mx;
+                if ($pic) {
+                    $post->{description} = '<div align="center">' . $pic . '</div>';
+                }
+                #print "    [$n] Image: ", substr($1, 0, 30), '... ', "\n";
+            }
 
             # Blog post content
             # Read until the end of line (there might be multiple <div>s)
             if ($blog_page =~ m{<div class="content-wrapper">(.*)</div>$}gm) {
-                $post->{description} = $1;
+                $post->{description} .= $1;
                 #print "    [$n] Body: ", substr($1, 0, 30), '... ', "\n";
             }
 

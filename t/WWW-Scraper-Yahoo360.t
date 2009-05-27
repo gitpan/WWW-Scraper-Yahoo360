@@ -3,7 +3,7 @@
 
 #########################
 
-use Test::More tests => 25;
+use Test::More tests => 32;
 
 BEGIN {
     use_ok('WWW::Scraper::Yahoo360')
@@ -175,4 +175,50 @@ for (@dates) {
         'Date {' . $date . '} is parsed correctly'
     );
 }
+
+# -----------------------------------------------------
+# A different page - parsing of blog posts and comments
+# -----------------------------------------------------
+
+$blog_page = File::Slurp::read_file(q{./t/blog2.html});
+$blog_info = $y360->blog_info($blog_page);
+#iag( JSON::XS->new->pretty->encode($blog_info) );
+
+is($blog_info->{title}, 'Test Blog', 'Title of blog extracted correctly');
+
+$posts = $y360->get_blog_posts($blog_page, start=>1, end=>5, count=>4);
+is(scalar @{$posts}, 4, 'Parsed 4 blog posts in the alternative test page');
+my $post = $posts->[0];
+
+is(
+    $post->{title}, 'Entry for March 17, 2007',
+    'Title of post extracted correctly'
+);
+is(
+    $post->{link}, 'http://blog.360.yahoo.com/blog-cqkAz2HmPNV3F9wncqkA-?cq=1&p=5',
+    'Link of blog post extracted correctly'
+);
+
+# Check parsing of pictures
+unlike(
+    $post->{description},
+    qr{<img \s src=}mx,
+    'Picture is not added when not present',
+);
+
+# Blog post content should be just blog post, no empty newlines or <div>s for picture
+is(
+    $post->{description},
+    '<p>Chuyen sang ngoi nha moi</p> <p>http://my.opera.com/testuser2</p>',
+	'Blog post contents with no picture are extracted correctly',
+);
+
+$post = $posts->[3];
+like(
+    $post->{description},
+    qr{<img \s src=}mx,
+    'Picture is parsed correctly'
+);
+
+#iag( JSON::XS->new->pretty->encode($posts) );
 
