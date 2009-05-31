@@ -15,6 +15,7 @@ use JSON::XS;
 use WWW::Scraper::Yahoo360;
 
 our $verbose;
+our $debug;
 
 sub debug {
     if ($verbose) {
@@ -26,11 +27,15 @@ GetOptions(
     'username:s' => \my $username,
     'password:s' => \my $password,
     'verbose'    => \$verbose,
+    'debug'      => \$debug,
 );
 
 if (! $username || ! $password) {
-    die "$0 --username=<yahoo_id> --password=<yahoo_password> [--verbose]\n";
+    die "$0 --username=<yahoo_id> --password=<yahoo_password> [--verbose] [--debug]\n";
 }
+
+# Global debug flag
+$WWW::Scraper::Yahoo360::DEBUG = $debug ? 1 : 0;
 
 my $y360 = WWW::Scraper::Yahoo360->new({
     username => $username,
