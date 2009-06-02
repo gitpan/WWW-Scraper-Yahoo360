@@ -1,6 +1,6 @@
 # $Id: WWW-Scraper-Yahoo360.t 168 2009-05-31 11:51:37Z cosimo $
 
-use Test::More tests => 40;
+use Test::More tests => 44;
 
 BEGIN {
     use_ok('WWW::Scraper::Yahoo360')
@@ -283,4 +283,41 @@ is(
     $post->{link}, 'http://blog.360.yahoo.com/blog-w7QmVu4cfGV4rfrQdjX5O6--?cq=1&p=1',
     'Link to blog post extracted correctly'
 );
+
+
+# -----------------------------------------------------
+# Another page that used to hang
+# -----------------------------------------------------
+
+diag("Parsing another crash-me page with no blog entries");
+
+$blog_page = File::Slurp::read_file(q{./t/blog4.html});
+$blog_info = $y360->blog_info($blog_page);
+#iag( JSON::XS->new->pretty->encode($blog_info) );
+
+like($blog_page, qr(There are no blog entries), 'No blog entries for this page');
+
+is(
+    $blog_info->{title}, 'Test4',
+    'Title of blog extracted correctly when page has no posts'
+);
+
+is(
+    $blog_info->{sharing}, 'public',
+    'Blog sharing parsed correctly when page has no posts'
+);
+
+# Catch infinite loop parsing regressions
+eval {
+    local $SIG{ALRM} = sub { die "timeout\n" };
+    alarm 5;
+    $posts = $y360->get_blog_posts($blog_page, start=>1, end=>1, count=>1);
+    alarm 0;
+};
+if ($@) {
+    ok(0, "Regression: get_blog_posts() should not hang when there's no blog posts");
+}
+else {
+    is(scalar @{$posts}, 0, 'Found no blog posts');
+}
 

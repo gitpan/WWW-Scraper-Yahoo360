@@ -20,7 +20,7 @@ use constant LOGIN_FORM => q{login_form};
 use constant LOGIN_URL  => q{https://login.yahoo.com/config/login_verify2?.intl=us&.done=http%3A%2F%2Fblog.360.yahoo.com%2Fblog%2F%3F.login%3D1&.src=360};
 
 our $DEBUG   = 0;
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 sub new {
     my ($class, $args) = @_;
@@ -316,6 +316,11 @@ sub get_blog_posts {
 
     $self->debug("Parsing posts ($start .. $end_blog)");
 
+    # Prevent endless loops
+    if ($start > $end_page) {
+        $start = $end_page;
+    }
+
     for (my $n = $start; $n <= $end_blog; ) {
 
         $self->debug(
@@ -344,6 +349,8 @@ sub get_blog_posts {
 
         }
 
+	my $found_posts = 0;
+
         while ($blog_page =~ m{<dt class="post-head">([^<]+)</dt>}gm) {
            
             # Blog post title 
@@ -354,6 +361,8 @@ sub get_blog_posts {
             };
 
             $self->debug('Found new blog post "', $title, '" (', $n, ')');
+
+            $found_posts = 1;
 
             # Main picture of the blog post
             if ($blog_page =~ m{<div class="image-wrapper">(.*?)</div>}gsmc) {
@@ -402,6 +411,10 @@ sub get_blog_posts {
             $n++;
 
         }
+
+        if (not $found_posts) {
+            last;
+	}
 
     }
 
